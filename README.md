@@ -24,11 +24,12 @@ This repository contains a set of Linux scripts used for housekeeping tasks perf
 
 ## 📌 Overview
 
-This project includes three primary script groups:
+This project includes four primary script groups:
 
 1. **housekeeping_sihome_log.sh** – organizes and archives BaNCSSI, EAI and SILOG log files by date.
 2. **housekeeping_sihome_bis4o2.sh** – processes BIS4 data files, moving them into a year/month folder structure and archiving old years.
 3. **rename_mocktest_files/** – manages mocktest configuration renames for active and original file sets.
+4. **compare_and_sftp_database/** – compares DC and DRC table counts and transfers count files between database hosts.
 
 All scripts keep the filesystem tidy, ease tracking, and reduce the number of files in source directories.
 
@@ -60,6 +61,7 @@ mkdir -p housekeeping_sihome_bis4o2/output
 chmod +x housekeeping_sihome_logs/housekeeping_sihome_log.sh
 chmod +x housekeeping_sihome_bis4o2/housekeeping_sihome_bis4o2.sh
 chmod +x rename_mocktest_files/*.sh
+chmod +x compare_and_sftp_database/*.sh
 ```
 
 Optional: run them from cron for daily/periodic automation.
@@ -94,9 +96,13 @@ script_bancs_custody_service/
 │   ├── file/                     # sample input files
 │   └── output/                   # processed output structure
 │       └── bis4/
-└── rename_mocktest_files/        # Mocktest rename helper module
-    ├── mock_active.sh
-    └── original_active.sh
+├── rename_mocktest_files/        # Mocktest rename helper module
+│   ├── mock_active.sh
+│   └── original_active.sh
+└── compare_and_sftp_database/    # Compare and SFTP database module
+    ├── compare_count_table.sh
+    ├── sftp_count_table_dc_to_drc.sh
+    └── sftp_count_table_drc_to_dc.sh
 ```
 
 ---
@@ -167,6 +173,28 @@ BASE_DIR="/export/home/cusadmin/BANCSHOME"
 
 ---
 
+### 4. compare_and_sftp_database
+
+**Purpose**: Compare DC and DRC count table exports, then transfer count files between the two database hosts.
+
+**Scripts**:
+- `compare_count_table.sh` — compare CSV count results from DC and DRC and write a summary report.
+- `sftp_count_table_dc_to_drc.sh` — send the DC count CSV to the DRC host.
+- `sftp_count_table_drc_to_dc.sh` — send the DRC count CSV to the DC host.
+
+**Workflow**:
+- Read source CSV files containing counts from each database environment.
+- Normalize and compare table counts, writing mismatches to a report file.
+- Transfer count CSV files via passwordless SFTP to the opposite host.
+
+**Default configuration**:
+```bash
+# Paths and SFTP targets are hard-coded in each script.
+# Ensure SSH keys and host permissions are configured for passwordless SFTP.
+```
+
+---
+
 ## 💻 Usage Guide
 
 Run scripts manually:
@@ -181,6 +209,11 @@ cd ../housekeeping_sihome_bis4o2
 cd ../rename_mocktest_files
 ./mock_active.sh
 ./original_active.sh
+
+cd ../compare_and_sftp_database
+./compare_count_table.sh
+./sftp_count_table_dc_to_drc.sh
+./sftp_count_table_drc_to_dc.sh
 ```
 
 Processed output and logs will appear under each module’s `output/` directory.

@@ -5,6 +5,7 @@
 # Description  : Melakukan simulasi mocktest dengan cara rename file konfigurasi.
 #                - Mode mock active: Backup file aktif ke *_Original, dan restore file *_MOC2025 ke aktif.
 #                - Logging proses dan status setiap langkah.
+# Server       : APP DC & DRC
 # Author       : 901146
 # Last Update  : 17-04-2026
 ###############################################################################

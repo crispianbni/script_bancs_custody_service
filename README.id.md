@@ -27,11 +27,12 @@ Repositori ini berisi kumpulan script Linux untuk tugas housekeeping yang dijala
 
 ## 📌 Ringkasan
 
-Proyek ini menampung tiga script utama:
+Proyek ini menampung empat script utama:
 
 1. **housekeeping_sihome_log.sh** – mengorganisir dan mengarsipkan log BaNCSSI, EAI, dan SILOG berdasarkan tanggal.
 2. **housekeeping_sihome_bis4o2.sh** – memproses file BIS4O2, memindahkannya ke struktur folder tahunan/bulanan, serta mengarsipkan tahun‑lama.
 3. **rename_mocktest_files/** – mengelola rename konfigurasi mocktest untuk mode active dan original.
+4. **compare_and_sftp_database/** – membandingkan hasil count tabel DC vs DRC dan mentransfer file count melalui SFTP.
 
 Semua script ini membantu menjaga kebersihan filesystem, mempermudah pelacakan, dan mengurangi file di direktori sumber.
 
@@ -63,6 +64,7 @@ mkdir -p housekeeping_sihome_bis4o2/output
 chmod +x housekeeping_sihome_logs/housekeeping_sihome_log.sh
 chmod +x housekeeping_sihome_bis4o2/housekeeping_sihome_bis4o2.sh
 chmod +x rename_mocktest_files/*.sh
+chmod +x compare_and_sftp_database/*.sh
 ```
 
 Opsional: jalankan di crontab untuk otomatisasi harian/periodik.
@@ -98,9 +100,13 @@ script_bancs_custody_service/
 │   └── output/                   # struktur output hasil pemrosesan
 │       └── bis4/
 │
-└── rename_mocktest_files/        # Modul helper mocktest rename
-    ├── mock_active.sh
-    └── original_active.sh
+├── rename_mocktest_files/        # Modul helper mocktest rename
+│   ├── mock_active.sh
+│   └── original_active.sh
+└── compare_and_sftp_database/    # Modul compare dan SFTP database
+    ├── compare_count_table.sh
+    ├── sftp_count_table_dc_to_drc.sh
+    └── sftp_count_table_drc_to_dc.sh
 ```
 
 ---
@@ -171,6 +177,28 @@ BASE_DIR="/export/home/cusadmin/BANCSHOME"
 
 ---
 
+### 4. compare_and_sftp_database
+
+**Tujuan**: Membandingkan export count tabel DC dan DRC, lalu mentransfer file count antar host database.
+
+**Script**:
+- `compare_count_table.sh` — membandingkan hasil CSV count dari DC dan DRC dan membuat laporan ringkasan.
+- `sftp_count_table_dc_to_drc.sh` — mengirim file count DC ke host DRC.
+- `sftp_count_table_drc_to_dc.sh` — mengirim file count DRC ke host DC.
+
+**Alur kerja**:
+- Baca file CSV source yang berisi count tabel masing-masing lingkungan database.
+- Normalisasi dan bandingkan count tabel, lalu tulis hasil mismatch ke file laporan.
+- Transfer file CSV count melalui SFTP passwordless ke host tujuan.
+
+**Konfigurasi default**:
+```bash
+# Jalur file dan target SFTP di-hardcode di setiap skrip.
+# Pastikan kunci SSH dan izin host dikonfigurasi untuk SFTP tanpa password.
+```
+
+---
+
 ## 💻 Cara Penggunaan
 
 Jalankan skrip secara manual:
@@ -185,6 +213,11 @@ cd ../housekeeping_sihome_bis4o2
 cd ../rename_mocktest_files
 ./mock_active.sh
 ./original_active.sh
+
+cd ../compare_and_sftp_database
+./compare_count_table.sh
+./sftp_count_table_dc_to_drc.sh
+./sftp_count_table_drc_to_dc.sh
 ```
 
 Output log dan struktur target akan terlihat di direktori `output/` masing‑masing.

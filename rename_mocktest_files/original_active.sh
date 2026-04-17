@@ -5,6 +5,7 @@
 # Description  : Melakukan simulasi original active dengan cara rename file konfigurasi.
 #                - Original Active: Backup file aktif ke *_Mock, restore file *_Original ke aktif.
 #                - Logging proses dan status setiap langkah.
+# Server       : APP DC & DRC
 # Author       : 901146
 # Last Update  : 17-04-2026
 ###############################################################################
