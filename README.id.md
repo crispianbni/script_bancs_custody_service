@@ -27,12 +27,13 @@ Repositori ini berisi kumpulan script Linux untuk tugas housekeeping yang dijala
 
 ## 📌 Ringkasan
 
-Proyek ini menampung dua script utama:
+Proyek ini menampung tiga script utama:
 
 1. **housekeeping_sihome_log.sh** – mengorganisir dan mengarsipkan log BaNCSSI, EAI, dan SILOG berdasarkan tanggal.
 2. **housekeeping_sihome_bis4o2.sh** – memproses file BIS4O2, memindahkannya ke struktur folder tahunan/bulanan, serta mengarsipkan tahun‑lama.
+3. **rename_mocktest_files/** – mengelola rename konfigurasi mocktest untuk mode active dan original.
 
-Keduanya mempromosikan kebersihan filesystem, mempermudah pelacakan, dan mengurangi jumlah file dalam direktori sumber.
+Semua script ini membantu menjaga kebersihan filesystem, mempermudah pelacakan, dan mengurangi file di direktori sumber.
 
 ---
 
@@ -61,6 +62,7 @@ mkdir -p housekeeping_sihome_bis4o2/output
 # berikan eksekusi
 chmod +x housekeeping_sihome_logs/housekeeping_sihome_log.sh
 chmod +x housekeeping_sihome_bis4o2/housekeeping_sihome_bis4o2.sh
+chmod +x rename_mocktest_files/*.sh
 ```
 
 Opsional: jalankan di crontab untuk otomatisasi harian/periodik.
@@ -90,11 +92,15 @@ script_bancs_custody_service/
 │       ├── EAI/
 │       └── SILOG/
 │
-└── housekeeping_sihome_bis4o2/   # Modul BIS4O2 housekeeping
-    ├── housekeeping_sihome_bis4o2.sh
-    ├── file/                     # contoh file input
-    └── output/                   # struktur output hasil pemrosesan
-        └── bis4/
+├── housekeeping_sihome_bis4o2/   # Modul BIS4O2 housekeeping
+│   ├── housekeeping_sihome_bis4o2.sh
+│   ├── file/                     # contoh file input
+│   └── output/                   # struktur output hasil pemrosesan
+│       └── bis4/
+│
+└── rename_mocktest_files/        # Modul helper mocktest rename
+    ├── mock_active.sh
+    └── original_active.sh
 ```
 
 ---
@@ -143,6 +149,28 @@ OUTFILE_BIS4="/export/home/cusadmin/BANCSHOME/SIHOME/datafiles/BIS4O2/archive/bi
 
 ---
 
+### 3. rename_mocktest_files
+
+**Tujuan**: Mengelola rename file konfigurasi mocktest antara mode active dan original.
+
+**Script**:
+- `mock_active.sh` — backup file konfigurasi aktif ke `*_Original` dan restore file `_MOC2025` sebagai aktif.
+- `original_active.sh` — backup file konfigurasi aktif ke `*_Mock` dan restore file `*_Original` sebagai aktif.
+
+**Alur kerja**:
+- Gunakan `BASE_DIR` untuk menemukan file konfigurasi di bawah instalasi BaNCS.
+- Rename file dengan pengecekan agar tidak menimpa file tujuan yang sudah ada.
+- Log setiap langkah dan tunggu sebentar antara fase rename.
+
+**Konfigurasi default**:
+```bash
+BASE_DIR="/export/home/cusadmin/BANCSHOME"
+```
+
+**Catatan**: Sesuaikan `BASE_DIR` atau jalankan skrip dari direktori modul sesuai kebutuhan.
+
+---
+
 ## 💻 Cara Penggunaan
 
 Jalankan skrip secara manual:
@@ -153,6 +181,10 @@ cd script_bancs_custody_service/housekeeping_sihome_logs
 
 cd ../housekeeping_sihome_bis4o2
 ./housekeeping_sihome_bis4o2.sh
+
+cd ../rename_mocktest_files
+./mock_active.sh
+./original_active.sh
 ```
 
 Output log dan struktur target akan terlihat di direktori `output/` masing‑masing.
